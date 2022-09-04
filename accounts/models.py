@@ -63,8 +63,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-    class_id = models.ForeignKey("info.Class", on_delete=models.CASCADE, default=1)
-    USN = models.CharField(primary_key='True', max_length=100)
+    class_id = models.ForeignKey("info.Class", on_delete=models.CASCADE, null=True)
+    USN = models.CharField(unique=True, max_length=100)
 
     def __str__(self):
         return str(self.user)
@@ -72,7 +72,7 @@ class Student(models.Model):
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
-    dept = models.ForeignKey("info.Dept", on_delete=models.CASCADE, default=1)
+    dept = models.ForeignKey("info.Dept", on_delete=models.CASCADE,null=True)
 
     def __str__(self):
         return str(self.user)
