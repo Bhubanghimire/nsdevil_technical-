@@ -35,7 +35,7 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(AttendanceClass)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ["id", "assign", "status", "date"]
+    list_display = ["id", "assign", "date"]
 
 
 @admin.register(StudentCourse)

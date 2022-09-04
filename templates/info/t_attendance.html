@@ -20,7 +20,7 @@
                 <tbody>
                 {% for s in c.student_set.all %}
                     <tr>
-                    <td>{{s.name}}</td>
+                    <td>{{s.user.full_name}}</td>
                     <td>
                         <div class="btn-group btn-group-toggle" data-toggle="buttons">
 

@@ -1,5 +1,6 @@
 from django.db import models
 from accounts.models import Teacher, Student
+import math
 
 sex_choice = (
     ('Male', 'Male'),
@@ -109,10 +110,7 @@ class Attendance(models.Model):
         # return str(self.student)
         sname = Student.objects.get(user=self.student.user)
         cname = Course.objects.get(name=self.course)
-        return '%s : %s' % (sname.name, cname.shortname)
-
-
-import math
+        return '%s : %s' % (sname.user.full_name, cname.shortname)
 
 
 class AttendanceTotal(models.Model):
@@ -166,7 +164,7 @@ class StudentCourse(models.Model):
 
     class Meta:
         unique_together = (('student', 'course'),)
-        verbose_name_plural = 'Marks'
+        verbose_name_plural = 'Student Course'
 
     def __str__(self):
         sname = Student.objects.get(user=self.student.user)

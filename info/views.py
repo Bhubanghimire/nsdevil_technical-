@@ -164,9 +164,72 @@ def t_student(request, assign_id):
 
 @login_required()
 def t_report(request, assign_id):
-    ass = get_object_or_404(Assign, id=assign_id)
     sc_list = []
-    for stud in ass.class_id.student_set.all():
-        a = StudentCourse.objects.get(student=stud, course=ass.course)
-        sc_list.append(a)
     return render(request, 'index.html', {'sc_list': sc_list})
+
+
+@login_required()
+def t_attendance_detail(request, stud_id, course_id):
+    stud = get_object_or_404(Student, USN=stud_id)
+    cr = get_object_or_404(Course, id=course_id)
+    att_list = Attendance.objects.filter(course=cr, student=stud).order_by('date')
+    return render(request, 'info/t_att_detail.html', {'att_list': att_list, 'cr': cr})
+
+@login_required()
+def t_attendance(request, ass_c_id):
+    assc = get_object_or_404(AttendanceClass, id=ass_c_id)
+    ass = assc.assign
+    c = ass.class_id
+    context = {
+        'ass': ass,
+        'c': c,
+        'assc': assc,
+    }
+    return render(request, 'info/t_attendance.html', context)
+
+@login_required()
+def cancel_class(request, ass_c_id):
+    assc = get_object_or_404(AttendanceClass, id=ass_c_id)
+    assc.status = 2
+    assc.save()
+    return HttpResponseRedirect(reverse('t_class_date', args=(assc.assign_id,)))
+
+
+@login_required()
+def confirm(request, ass_c_id):
+    assc = get_object_or_404(AttendanceClass, id=ass_c_id)
+    ass = assc.assign
+    cr = ass.course
+    cl = ass.class_id
+    for i, s in enumerate(cl.student_set.all()):
+        status = request.POST[s.USN]
+        print(status)
+        if status == 'present':
+            status = 'True'
+        else:
+            status = 'False'
+        if assc.status == 1:
+            a = Attendance.objects.filter(course=cr, student=s, date=assc.date, attendanceclass=assc)
+            if a.first():
+                a.update(status = status)
+            else:
+                a = Attendance(course=cr, student=s, status=status, date=assc.date, attendanceclass=assc)
+                a.save()
+        else:
+            a = Attendance(course=cr, student=s, status=status, date=assc.date, attendanceclass=assc)
+            a.save()
+            assc.status = 1
+            assc.save()
+
+    return HttpResponseRedirect(reverse('t_class_date', args=(ass.id,)))
+
+@login_required()
+def edit_att(request, ass_c_id):
+    assc = get_object_or_404(AttendanceClass, id=ass_c_id)
+    cr = assc.assign.course
+    att_list = Attendance.objects.filter(attendanceclass=assc, course=cr)
+    context = {
+        'assc': assc,
+        'att_list': att_list,
+    }
+    return render(request, 'info/t_edit_att.html', context)

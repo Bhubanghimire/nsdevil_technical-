@@ -14,6 +14,11 @@ urlpatterns = [
     path('teacher/<int:assign_id>/Extra_class/', views.t_extra_class, name='t_extra_class'),
     path('teacher/<int:assign_id>/Students/attendance/', views.t_student, name='t_student'),
     path('teacher/<int:assign_id>/Report/', views.t_report, name='t_report'),
+    path('teacher/<slug:stud_id>/<slug:course_id>/attendance/', views.t_attendance_detail, name='t_attendance_detail'),
+    path('teacher/<int:ass_c_id>/attendance/', views.t_attendance, name='t_attendance'),
+    path('teacher/<int:ass_c_id>/Cancel/', views.cancel_class, name='cancel_class'),
+    path('teacher/<int:ass_c_id>/attendance/confirm/', views.confirm, name='confirm'),
+    path('teacher/<int:ass_c_id>/Edit_att/', views.edit_att, name='edit_att'),
 
 ]
 

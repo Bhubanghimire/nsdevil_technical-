@@ -9,7 +9,7 @@
                     <tr>
                         <th>Class</th>
                         <th>Course</th>
-                        <th></th>
+                        <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -20,7 +20,6 @@
                         <td>
                             {% if choice == 1 %}
                                 <a class="btn btn-primary" href="{% url 't_class_date' ass.id %}" role="button">Enter Attendance</a>
-                                <a class="btn btn-warning" href="{% url 't_extra_class' ass.id %}">Extra Class</a>
                                 <a class="btn btn-danger" href="{% url 't_student' ass.id %}">View Students</a>
 
                             {% elif choice == 2 %}
