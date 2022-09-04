@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
-from .models import Dept, Class, AssignTime, DAYS_OF_WEEK, time_slots, Assign, Attendance, AttendanceClass, AttendanceTotal,StudentCourse
+from .models import Dept, Class, AssignTime, DAYS_OF_WEEK, time_slots, Assign, Attendance, AttendanceClass, \
+    AttendanceTotal, StudentCourse
 # Attendance, Course,  Assign, AttendanceTotal, time_slots,DAYS_OF_WEEK, AssignTime, AttendanceClass, StudentCourse, Marks, MarksClass
 from django.urls import reverse
 from django.utils import timezone
@@ -18,7 +19,6 @@ def index(request):
     if request.user.is_student:
         return render(request, 'info/homepage.html')
     return render(request, 'info/logout.html')
-
 
 
 @login_required
@@ -51,6 +51,7 @@ def t_timetable(request, teacher_id):
     }
     return render(request, 'info/t_timetable.html', context)
 
+
 @login_required()
 def attendance(request, stud_id):
     stud = Student.objects.get(USN=stud_id)
@@ -64,6 +65,7 @@ def attendance(request, stud_id):
             a.save()
         att_list.append(a)
     return render(request, 'info/attendance.html', {'att_list': att_list})
+
 
 @login_required()
 def marks_list(request, stud_id):
@@ -118,6 +120,7 @@ def attendance_detail(request, stud_id, course_id):
     att_list = Attendance.objects.filter(course=cr, student=stud).order_by('date')
     return render(request, 'info/att_detail.html', {'att_list': att_list, 'cr': cr})
 
+
 @login_required()
 def free_teachers(request, asst_id):
     asst = get_object_or_404(AssignTime, id=asst_id)
@@ -138,6 +141,7 @@ def t_class_date(request, assign_id):
     att_list = ass.attendanceclass_set.filter(date__lte=now).order_by('-date')
     return render(request, 'info/t_class_date.html', {'att_list': att_list})
 
+
 @login_required()
 def t_extra_class(request, assign_id):
     ass = get_object_or_404(Assign, id=assign_id)
@@ -147,6 +151,7 @@ def t_extra_class(request, assign_id):
         'c': c,
     }
     return render(request, 'info/t_extra_class.html', context)
+
 
 @login_required()
 def t_student(request, assign_id):
@@ -162,10 +167,53 @@ def t_student(request, assign_id):
     return render(request, 'info/t_students.html', {'att_list': att_list})
 
 
+# import json
+import datetime
 @login_required()
-def t_report(request, assign_id):
-    sc_list = []
-    return render(request, 'index.html', {'sc_list': sc_list})
+def t_report(request, assign_id, course_id):
+    week = (datetime.datetime.now()-datetime.timedelta(days=7)).date()
+    month = (datetime.datetime.now()-datetime.timedelta(days=30)).date()
+
+    bar_label = []
+    week_present = []
+    month_present = []
+    week_absent = []
+    month_absent = []
+    attendance = Attendance.objects.filter(course=course_id)
+    students = Student.objects.filter(studentcourse__course=course_id)
+
+    for student in students:
+        bar_label.append(student.user.full_name)
+        weekly_present = attendance.filter(student=student.id, status=1, date__gte=week).count()
+        monthly_present = attendance.filter(student=student.id, status=1, date__gte=month).count()
+
+        week_present.append(weekly_present)
+        month_present.append(monthly_present)
+        week_absent.append(attendance.count() - weekly_present)
+        month_absent.append(attendance.count() - weekly_present)
+
+    week_pie = attendance.filter(date__gte=week)
+    month_pie = attendance.filter(date__gte=month)
+
+    pie_week = [week_pie.filter(status=1).count(), week_pie.filter(status=0).count()]
+    pie_month = [month_pie.filter(status=1).count(), month_pie.filter(status=0).count()]
+
+    context = {
+        "bar_data": bar_label,
+        "pie_data": [
+            "total_present",
+            "total_absent"
+        ],
+
+        "weekly_present": week_present,
+        "weekly_absent": week_absent,
+        "monthly_present": month_present,
+        "monthly_absent": month_absent,
+        "pie_weekly": pie_week,
+        "pie_monthly": pie_month,
+
+    }
+    return render(request, 'index.html', context=context)
 
 
 @login_required()
@@ -174,6 +222,7 @@ def t_attendance_detail(request, stud_id, course_id):
     cr = get_object_or_404(Course, id=course_id)
     att_list = Attendance.objects.filter(course=cr, student=stud).order_by('date')
     return render(request, 'info/t_att_detail.html', {'att_list': att_list, 'cr': cr})
+
 
 @login_required()
 def t_attendance(request, ass_c_id):
@@ -186,6 +235,7 @@ def t_attendance(request, ass_c_id):
         'assc': assc,
     }
     return render(request, 'info/t_attendance.html', context)
+
 
 @login_required()
 def cancel_class(request, ass_c_id):
@@ -211,7 +261,7 @@ def confirm(request, ass_c_id):
         if assc.status == 1:
             a = Attendance.objects.filter(course=cr, student=s, date=assc.date, attendanceclass=assc)
             if a.first():
-                a.update(status = status)
+                a.update(status=status)
             else:
                 a = Attendance(course=cr, student=s, status=status, date=assc.date, attendanceclass=assc)
                 a.save()
@@ -222,6 +272,7 @@ def confirm(request, ass_c_id):
             assc.save()
 
     return HttpResponseRedirect(reverse('t_class_date', args=(ass.id,)))
+
 
 @login_required()
 def edit_att(request, ass_c_id):

@@ -30,7 +30,7 @@ class StudentAdmin(admin.ModelAdmin):
 
 @admin.register(Attendance)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ["id", "course", "student", "date"]
+    list_display = ["id", "course", "student","status", "date"]
 
 
 @admin.register(AttendanceClass)
