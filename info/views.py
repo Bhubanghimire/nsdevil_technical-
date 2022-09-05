@@ -202,9 +202,6 @@ def t_report(request, assign_id, course_id):
         total_absent_month += (attendance.count() - weekly_present)
         total_absent_week += (attendance.count() - weekly_present)
 
-
-
-
     pie_week = [total_present_week, total_absent_week]
     pie_month = [total_present_month, total_absent_month]
 
