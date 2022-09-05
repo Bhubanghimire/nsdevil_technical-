@@ -182,6 +182,11 @@ def t_report(request, assign_id, course_id):
     attendance = Attendance.objects.filter(course=course_id)
     students = Student.objects.filter(studentcourse__course=course_id)
 
+    total_present_week = 0
+    total_present_month = 0
+    total_absent_month = 0
+    total_absent_week = 0
+
     for student in students:
         bar_label.append(student.user.full_name)
         weekly_present = attendance.filter(student=student.id, status=1, date__gte=week).count()
@@ -192,11 +197,16 @@ def t_report(request, assign_id, course_id):
         week_absent.append(attendance.count() - weekly_present)
         month_absent.append(attendance.count() - weekly_present)
 
-    week_pie = attendance.filter(date__gte=week)
-    month_pie = attendance.filter(date__gte=month)
+        total_present_week += weekly_present
+        total_present_month += monthly_present
+        total_absent_month += (attendance.count() - weekly_present)
+        total_absent_week += (attendance.count() - weekly_present)
 
-    pie_week = [week_pie.filter(status=1).count(), week_pie.filter(status=0).count()]
-    pie_month = [month_pie.filter(status=1).count(), month_pie.filter(status=0).count()]
+
+
+
+    pie_week = [total_present_week, total_absent_week]
+    pie_month = [total_present_month, total_absent_month]
 
     context = {
         "bar_data": bar_label,
